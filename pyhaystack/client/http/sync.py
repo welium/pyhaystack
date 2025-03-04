@@ -22,12 +22,30 @@ try:
     from requests.exceptions import SSLError
 except ImportError:
     from requests.packages.urllib3.exceptions import SSLError
+from requests.adapters import HTTPAdapter
+from urllib3.util.ssl_ import create_urllib3_context
+
+
+class AllCipherAdapter(HTTPAdapter):
+    def __init__(self, *args, **kwargs):
+        # Create a custom SSL context
+        self.ssl_context = create_urllib3_context()
+        # Relax security: Allow older TLS versions and weaker ciphers
+        self.ssl_context.set_ciphers("ALL")
+        self.ssl_context.check_hostname = False
+        super().__init__(*args, **kwargs)
+
+    def init_poolmanager(self, *args, **kwargs):
+        kwargs["ssl_context"] = self.ssl_context
+        return super().init_poolmanager(*args, **kwargs)
 
 
 class SyncHttpClient(HTTPClient):
     def __init__(self, **kwargs):
         super(SyncHttpClient, self).__init__(**kwargs)
-        self._session = requests.Session() if self.requests_session else requests
+        session = requests.Session()
+        session.mount("https://", AllCipherAdapter())
+        self._session = session
 
     def _request(
         self,
@@ -44,7 +62,6 @@ class SyncHttpClient(HTTPClient):
         tls_cert,
         accept_status,
     ):
-
         if auth is not None:
             if isinstance(auth, BasicAuthenticationCredentials):
                 auth = requests.auth.HTTPBasicAuth(auth.username, auth.password)
