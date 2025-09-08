@@ -149,25 +149,25 @@ class HaystackSession(object):
 
         return auth_op
 
-    def about(self, cache=True, callback=None):
+    def about(self, cache=True, callback=None, **kwargs):
         """
         Retrieve the version information of this Project Haystack server.
         """
-        return self._on_about(cache=cache, callback=callback)
+        return self._on_about(cache=cache, callback=callback, **kwargs)
 
-    def ops(self, cache=True, callback=None):
+    def ops(self, cache=True, callback=None, **kwargs):
         """
         Retrieve the operations supported by this Project Haystack server.
         """
-        return self._on_ops(cache=cache, callback=callback)
+        return self._on_ops(cache=cache, callback=callback, **kwargs)
 
-    def formats(self, cache=True, callback=None):
+    def formats(self, cache=True, callback=None, **kwargs):
         """
         Retrieve the grid formats supported by this Project Haystack server.
         """
-        return self._on_formats(cache=cache, callback=callback)
+        return self._on_formats(cache=cache, callback=callback, **kwargs)
 
-    def read(self, ids=None, filter_expr=None, limit=None, callback=None):
+    def read(self, ids=None, filter_expr=None, limit=None, callback=None, **kwargs):
         """
         Retrieve information on entities matching the given criteria.
         Either ids or filter_expr may be given.  ids may be given as a
@@ -183,19 +183,19 @@ class HaystackSession(object):
         :param limit: A limit on the number of entities to return.
         """
         return self._on_read(
-            ids=ids, filter_expr=filter_expr, limit=limit, callback=callback
+            ids=ids, filter_expr=filter_expr, limit=limit, callback=callback, **kwargs
         )
 
-    def nav(self, nav_id=None, callback=None):
+    def nav(self, nav_id=None, callback=None, **kwargs):
         """
         The nav op is used navigate a project for learning and discovery. This
         operation allows servers to expose the database in a human-friendly
         tree (or graph) that can be explored.
         """
-        return self._on_nav(nav_id=nav_id, callback=callback)
+        return self._on_nav(nav_id=nav_id, callback=callback, **kwargs)
 
     def watch_sub(
-        self, points, watch_id=None, watch_dis=None, lease=None, callback=None
+        self, points, watch_id=None, watch_dis=None, lease=None, callback=None, **kwargs
     ):
         """
         This creates a new watch with debug string watch_dis, identifier
@@ -208,9 +208,10 @@ class HaystackSession(object):
             watch_dis=watch_dis,
             lease=lease,
             callback=callback,
+            **kwargs,
         )
 
-    def watch_unsub(self, watch, points=None, callback=None):
+    def watch_unsub(self, watch, points=None, callback=None, **kwargs):
         """
         watch is either the value of watch_id given when creating a watch, or
         an instance of a Watch object.
@@ -219,9 +220,11 @@ class HaystackSession(object):
         hszinc.Ref objects which will be removed from the Watch object.
         Otherwise, it closes the Watch object.
         """
-        return self._on_watch_unsub(watch=watch, points=points, callback=callback)
+        return self._on_watch_unsub(
+            watch=watch, points=points, callback=callback, **kwargs
+        )
 
-    def watch_poll(self, watch, refresh=False, callback=None):
+    def watch_poll(self, watch, refresh=False, callback=None, **kwargs):
         """
         watch is either the value of watch_id given when creating a watch, or
         an instance of a Watch object.
@@ -229,10 +232,19 @@ class HaystackSession(object):
         If refresh is True, then all points on the watch will be updated, not
         just those that have changed since the last poll.
         """
-        return self._on_watch_poll(watch=watch, refresh=refresh, callback=callback)
+        return self._on_watch_poll(
+            watch=watch, refresh=refresh, callback=callback, **kwargs
+        )
 
     def point_write(
-        self, point, level=None, val=None, who=None, duration=None, callback=None
+        self,
+        point,
+        level=None,
+        val=None,
+        who=None,
+        duration=None,
+        callback=None,
+        **kwargs,
     ):
         """
         point is either the ID of the writeable point entity, or an instance of
@@ -251,9 +263,10 @@ class HaystackSession(object):
             who=who,
             duration=duration,
             callback=callback,
+            **kwargs,
         )
 
-    def his_read(self, point, rng, callback=None):
+    def his_read(self, point, rng, callback=None, **kwargs):
         """
         point is either the ID of the historical point entity, or an instance
         of the historical point entity to read historical from.  rng is
@@ -262,9 +275,9 @@ class HaystackSession(object):
         datetime.datetime (providing all samples since the nominated time) or a
         slice of datetime.dates or datetime.datetimes.
         """
-        return self._on_his_read(point=point, rng=rng, callback=callback)
+        return self._on_his_read(point=point, rng=rng, callback=callback, **kwargs)
 
-    def his_write(self, point, timestamp_records, callback=None):
+    def his_write(self, point, timestamp_records, callback=None, **kwargs):
         """
         point is either the ID of the writeable historical point entity, or an
         instance of the writeable historical point entity to write historical
@@ -273,7 +286,10 @@ class HaystackSession(object):
         Pandas Series object.
         """
         return self._on_his_write(
-            point=point, timestamp_records=timestamp_records, callback=callback
+            point=point,
+            timestamp_records=timestamp_records,
+            callback=callback,
+            **kwargs,
         )
 
     def invoke_action(self, entity, action, callback=None, **kwargs):
@@ -286,7 +302,7 @@ class HaystackSession(object):
             entity=entity, action=action, callback=callback, action_args=kwargs
         )
 
-    def get_entity(self, ids, refresh=False, single=None, callback=None):
+    def get_entity(self, ids, refresh=False, single=None, callback=None, **kwargs):
         """
         Retrieve instances of entities, possibly refreshing them.
 
@@ -304,13 +320,15 @@ class HaystackSession(object):
         elif single is None:
             single = False
 
-        op = self._GET_ENTITY_OPERATION(self, ids, refresh, single)
+        op = self._GET_ENTITY_OPERATION(self, ids, refresh, single, **kwargs)
         if callback is not None:
             op.done_sig.connect(callback)
         op.go()
         return op
 
-    def find_entity(self, filter_expr, limit=None, single=False, callback=None):
+    def find_entity(
+        self, filter_expr, limit=None, single=False, callback=None, **kwargs
+    ):
         """
         Retrieve instances of entities that match a filter expression.
 
@@ -320,13 +338,15 @@ class HaystackSession(object):
                        True if `ids` is not a list.
         :param callback: Asynchronous result callback.
         """
-        op = self._FIND_ENTITY_OPERATION(self, filter_expr, limit, single)
+        op = self._FIND_ENTITY_OPERATION(self, filter_expr, limit, single, **kwargs)
         if callback is not None:
             op.done_sig.connect(callback)
         op.go()
         return op
 
-    def his_read_series(self, point, rng, tz=None, series_format=None, callback=None):
+    def his_read_series(
+        self, point, rng, tz=None, series_format=None, callback=None, **kwargs
+    ):
         """
         Read the historical data of the given point and return it as a series.
 
@@ -341,13 +361,15 @@ class HaystackSession(object):
             else:
                 series_format = self._HIS_READ_SERIES_OPERATION.FORMAT_LIST
 
-        op = self._HIS_READ_SERIES_OPERATION(self, point, rng, tz, series_format)
+        op = self._HIS_READ_SERIES_OPERATION(
+            self, point, rng, tz, series_format, **kwargs
+        )
         if callback is not None:
             op.done_sig.connect(callback)
         op.go()
         return op
 
-    def his_write_series(self, point, series, tz=None, callback=None):
+    def his_write_series(self, point, series, tz=None, callback=None, **kwargs):
         """
         Write the historical data of the given point.
 
@@ -355,13 +377,15 @@ class HaystackSession(object):
         :param series: Historical series data to write
         :param tz: Optional timezone to translate timestamps to
         """
-        op = self._HIS_WRITE_SERIES_OPERATION(self, point, series, tz)
+        op = self._HIS_WRITE_SERIES_OPERATION(self, point, series, tz, **kwargs)
         if callback is not None:
             op.done_sig.connect(callback)
         op.go()
         return op
 
-    def his_read_frame(self, columns, rng, tz=None, frame_format=None, callback=None):
+    def his_read_frame(
+        self, columns, rng, tz=None, frame_format=None, callback=None, **kwargs
+    ):
         """
         Read the historical data of multiple given points and return
         them as a data frame.
@@ -378,13 +402,15 @@ class HaystackSession(object):
             else:
                 frame_format = self._HIS_READ_FRAME_OPERATION.FORMAT_LIST
 
-        op = self._HIS_READ_FRAME_OPERATION(self, columns, rng, tz, frame_format)
+        op = self._HIS_READ_FRAME_OPERATION(
+            self, columns, rng, tz, frame_format, **kwargs
+        )
         if callback is not None:
             op.done_sig.connect(callback)
         op.go()
         return op
 
-    def his_write_frame(self, frame, columns=None, tz=None, callback=None):
+    def his_write_frame(self, frame, columns=None, tz=None, callback=None, **kwargs):
         """
         Write the historical data of multiple given points.
 
@@ -396,7 +422,7 @@ class HaystackSession(object):
                         entity instances.
         :param tz: Reference timestamp to use for writing, default is UTC.
         """
-        op = self._HIS_WRITE_FRAME_OPERATION(self, columns, frame, tz)
+        op = self._HIS_WRITE_FRAME_OPERATION(self, columns, frame, tz, **kwargs)
         if callback is not None:
             op.done_sig.connect(callback)
         op.go()
@@ -424,7 +450,7 @@ class HaystackSession(object):
     FEATURE_HISWRITE_MULTI = "hisWrite/multi"  # Multi-point hisWrite
     FEATURE_ID_UUID = "id_uuid"
 
-    def has_features(self, features, cache=True, callback=None):
+    def has_features(self, features, cache=True, callback=None, **kwargs):
         """
         Determine if a given feature is supported.  This is a helper function
         for determining if the server implements a given feature.  The feature
@@ -434,7 +460,7 @@ class HaystackSession(object):
 
         :param features: Features to check for.
         """
-        op = self._HAS_FEATURES_OPERATION(self, features, cache=cache)
+        op = self._HAS_FEATURES_OPERATION(self, features, cache=cache, **kwargs)
         if callback is not None:
             op.done_sig.connect(callback)
         op.go()
